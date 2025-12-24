@@ -17,7 +17,7 @@ enum {
   TK_REG,
   TK_NEQ,
   TK_AND,
-  TK_DEREF,
+  TK_DEREf,
 };
 
 static struct rule {
@@ -118,51 +118,49 @@ static bool make_token(char *e) {
   return true;
 }
 
-bool check_parentheses (int start, int end) {
-  if (tokens[start].type != '(' || tokens[end].type != ')')
+bool check_parentheses (int p, int q) {
+  if (tokens[p].type != '(' || tokens[q].type != ')')
     return false;
   
-  int balance = 0;
-  for (int i = start; i <= end; i ++) {
-    if (tokens[i].type == '(') balance ++;
-    else if (tokens[i].type == ')') balance --;
-    if (balance == 0 && i != end) return false;
+  int bracket_sta = 0;
+  for (int i = p; i <= q; i ++) {
+    if (tokens[i].type == '(') bracket_sta ++;
+    else if (tokens[i].type == ')') bracket_sta --;
+    if (bracket_sta == 0 && i != q) return false;
   }
   return true;
 }
 
-uint32_t eval (int start, int end, bool *success) {
-  if (start > end) {
+uint32_t eval (int p, int q, bool *success) {
+  if (p > q) {
     *success = false;
     return 0;
-  } else if (start == end) {
+  } else if (p == q) {
     uint32_t val = 0;
-    switch (tokens[start].type) {
+    switch (tokens[p].type) {
       case TK_DEC:
-        val = strtoul(tokens[start].str, NULL, 10);
+        val = strtoul(tokens[p].str, NULL, 10);
         break;
       case TK_HEX:
-        val = strtoul(tokens[start].str, NULL, 16);
+        val = strtoul(tokens[p].str, NULL, 16);
         break;
-      case TK_REG:
-      {
-        bool is_reg = true;
-        val = isa_reg_str2val(tokens[start].str + 1, &is_reg);
+      case TK_REG:      
+        {bool is_reg = true;
+        val = isa_reg_str2val(tokens[p].str + 1, &is_reg);
         if (is_reg == false)
           *success = false;
-        break;
-        }
+        break;}
       default:
         *success = false;
         break;
     }
     return val;
-  } else if (check_parentheses(start, end) == true) {
-    return eval(start + 1, end - 1, success);
+  } else if (check_parentheses(p, q) == true) {
+    return eval(p + 1, q - 1, success);
   } else {
     int op_0 = -1, op_1 = -1, op_2 = -1, op, bracket_sta = 0;
 
-    for (int i = start; i <= end; i ++) {
+    for (int i = p; i <= q; i ++) {
       switch (tokens[i].type) {
         case '(':
           bracket_sta ++;
@@ -202,15 +200,15 @@ uint32_t eval (int start, int end, bool *success) {
     }
 
     if (op_0 == -1 && op_1 == -1 && op_2 == -1) {
-      u_int32_t val = eval(start + 1, end, success);
+      u_int32_t val = eval(p + 1, q, success);
       if (*success == false)
         return 0;
 
-      switch (tokens[start].type) {
+      switch (tokens[p].type) {
         case TK_NEG:
           val = -val;
           break;
-        case TK_DEREF:
+        case TK_DEREf:
           val = isa_vaddr_read(val, 4);
           break;
         default:
@@ -225,7 +223,7 @@ uint32_t eval (int start, int end, bool *success) {
     else if (op_1 != -1) op = op_1;
     else op = op_2;
 
-    uint32_t val_l = eval(start, op - 1, success), val_r = eval(op + 1, end, success), val = 0;
+    uint32_t val_l = eval(p, op - 1, success), val_r = eval(op + 1, q, success), val = 0;
     switch (tokens[op].type) {
       case '+':
         val = val_l + val_r;
@@ -269,7 +267,7 @@ bool check_unary_opt (int i) {
     case TK_EQ:
     case TK_NEQ:
     case TK_AND:
-    case TK_DEREF:
+    case TK_DEREf:
       return true;
     default:
       return false;
@@ -289,7 +287,7 @@ uint32_t expr(char *e, bool *success) {
       tokens[i].type = TK_NEG;
     
     if (tokens[i].type == '*' && check_unary_opt(i))
-      tokens[i].type = TK_DEREF;
+      tokens[i].type = TK_DEREf;
   }
   
   *success = true;
