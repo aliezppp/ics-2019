@@ -17,6 +17,7 @@ void init_wp_pool() {
   head = NULL;
   free_ = wp_pool;
 }
+
 /* TODO: Implement the functionality of watchpoint */
 
 void new_wp (const char *args, uint32_t val) {
@@ -67,7 +68,7 @@ void watchpoint_display () {
 }
 
 bool check_watchpoint () {
-  bool changed = false;
+  bool is_changed = false;
 
   WP *point = head;
   while (point != NULL) {
@@ -80,13 +81,11 @@ bool check_watchpoint () {
       printf("New value: %u\n\n", new_val);
 
       point->last_val = new_val;
-      changed = true;
+      is_changed = true;
     }
 
     point = point->next;
   }
 
-  return changed;
+  return is_changed;
 }
-
-
