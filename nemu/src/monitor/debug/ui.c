@@ -93,7 +93,7 @@ static int cmd_info(char *args)
   char *arg=strtok(NULL,"");
   if(strcmp(arg,"r")==0)
   {
-    is_reg_display();
+    isa_reg_display();
   }
   /*else if(strcmp(arg,"w")==0)
   {
