@@ -144,10 +144,10 @@ static int cmd_info(char *args)
   {
     isa_reg_display();
   }
-  /*else if(strcmp(arg,"w")==0)
+  else if(strcmp(arg,"w")==0)
   {
     watchpoint_display();
-  }*/
+  }
   else
   {
     printf("Unknown command '%s'\n", arg);
