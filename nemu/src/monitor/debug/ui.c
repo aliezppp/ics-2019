@@ -38,7 +38,7 @@ static int cmd_q(char *args) {
 static int cmd_si (char *args);
 static int cmd_info (char *args);
 static int cmd_help(char *args);
-
+static int cmd_x (char *args);
 static struct {
   char *name;
   char *description;
@@ -49,6 +49,7 @@ static struct {
   { "q", "Exit NEMU", cmd_q },
   { "si","Execute N(default 1) instructions in a single step", cmd_si},
   {"info", "Print status of registers when argument is 'r', print infomations of watchpoints when argument is 'w'", cmd_info},
+  {"x", "Output N consecutive 4-bytes in hexadecimal with the expression EXPR as the starting memory address", cmd_x},
   /* TODO: Add more commands */
 
 };
@@ -75,6 +76,36 @@ static int cmd_help(char *args) {
     }
     printf("Unknown command '%s'\n", arg);
   }
+  return 0;
+}
+static int cmd_x(char *args)
+{
+  char *arg_end = args + strlen(args);
+  char *arg = strtok(NULL, " ");
+
+  if (arg == NULL) {
+    printf("Input the number of 4-bytes in decimal as 'N'\n");
+    return 0;
+  }
+  int num = strtol(arg, NULL, 10);
+
+  args += strlen(arg) + 1;
+  if (args >= arg_end) {
+    printf("Input the starting memory address as 'EXPR'\n");
+    return 0;
+  }
+
+  bool success = true;
+  vaddr_t addr = expr(args, &success);
+  if (success == false) {
+    printf("The input 'EXPR' is wrong\n");
+    return 0;
+  }
+
+  for (int i = 0; i < num; i ++)
+    printf("0x%08x  ", isa_vaddr_read(addr + i * 4, 4));
+  printf("\n");
+
   return 0;
 }
 static int cmd_si(char *args){
