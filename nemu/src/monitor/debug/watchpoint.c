@@ -76,6 +76,8 @@ bool check_watchpoint () {
   while (point != NULL) {
     bool success = true;
     uint32_t new_val = expr(point->expr, &success);
+    printf("Old value: %u\n", point->last_val);
+      printf("New value: %u\n\n", new_val);
     if (new_val != point->last_val) {
       printf("\nWatchpoint %d:\n", point->NO);
       printf("EXPR: %s\n", point->expr);
