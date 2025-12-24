@@ -40,6 +40,7 @@ static int cmd_info (char *args);
 static int cmd_help(char *args);
 static int cmd_x (char *args);
 static int cmd_p (char *args);
+static int cmd_w (char *args);
 static struct {
   char *name;
   char *description;
@@ -52,6 +53,7 @@ static struct {
   {"info", "Print status of registers when argument is 'r', print infomations of watchpoints when argument is 'w'", cmd_info},
   {"x", "Output N consecutive 4-bytes in hexadecimal with the expression EXPR as the starting memory address", cmd_x},
   {"p", "Print the value of the expression EXPR", cmd_p},
+   {"w", "Add a new watchpoint with the expression EXPR", cmd_w},
   /* TODO: Add more commands */
 
 };
@@ -78,6 +80,22 @@ static int cmd_help(char *args) {
     }
     printf("Unknown command '%s'\n", arg);
   }
+  return 0;
+}
+static int cmd_w (char *args) {
+  if (args == NULL) {
+    printf("Input the 'EXPR'\n");
+    return 0;
+  }
+
+  bool success = true;
+  uint32_t val = expr(args, &success);
+  if (success == false) {
+    printf("The input 'EXPR' is wrong\n");
+    return 0;
+  }
+  new_wp(args, val);
+
   return 0;
 }
 static int cmd_p (char *args) {
