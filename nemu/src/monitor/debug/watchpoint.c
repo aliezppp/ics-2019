@@ -69,6 +69,7 @@ void watchpoint_display () {
 
 bool check_watchpoint () {
   bool is_changed = false;
+  printf("%s","watchpoint");
   
 
   WP *point = head;
