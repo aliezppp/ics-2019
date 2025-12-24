@@ -77,7 +77,7 @@ static int cmd_help(char *args) {
   return 0;
 }
 static int cmd_si(char *args){
-  char *arg=stoken(NULL," ");
+  char *arg=strtok(NULL," ");
   if(arg==NULL)
   cpu_exec(1);
   else
