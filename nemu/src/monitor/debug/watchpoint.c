@@ -67,7 +67,7 @@ void watchpoint_display () {
 }
 
 bool check_watchpoint () {
-  bool is_changed = false;
+  bool changed = false;
 
   WP *point = head;
   while (point != NULL) {
@@ -80,13 +80,13 @@ bool check_watchpoint () {
       printf("New value: %u\n\n", new_val);
 
       point->last_val = new_val;
-      is_changed = true;
+      changed = true;
     }
 
     point = point->next;
   }
 
-  return is_changed;
+  return changed;
 }
 
 
