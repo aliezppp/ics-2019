@@ -14,6 +14,8 @@ typedef struct {
 
 } CPU_state;
 
+void isa_reg_display ();
+
 static inline int check_reg_index(int index) {
   assert(index >= 0 && index < 32);
   return index;
@@ -26,5 +28,7 @@ static inline const char* reg_name(int index, int width) {
   assert(index >= 0 && index < 32);
   return regsl[index];
 }
+
+uint32_t isa_reg_str2val (const char *s, bool *success);
 
 #endif
