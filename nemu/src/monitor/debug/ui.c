@@ -2,6 +2,7 @@
 #include "monitor/expr.h"
 #include "monitor/watchpoint.h"
 #include "nemu.h"
+#include "../../isa/riscv32/include/isa/reg.h"
 
 #include <stdlib.h>
 #include <readline/readline.h>
@@ -37,6 +38,12 @@ static int cmd_q(char *args) {
 }
 
 static int cmd_help(char *args);
+static int cmd_si (char *args);
+static int cmd_info (char *args);
+static int cmd_p (char *args);
+static int cmd_x (char *args);
+static int cmd_w (char *args);
+static int cmd_d (char *args);
 
 static struct {
   char *name;
@@ -49,10 +56,113 @@ static struct {
 
   /* TODO: Add more commands */
 
+  {"si", "Execute N(default 1) instructions in a single step", cmd_si},
+  {"info", "Print status of registers when argument is 'r', print infomations of watchpoints when argument is 'w'", cmd_info},
+  {"p", "Print the value of the expression EXPR", cmd_p},
+  {"x", "Output N consecutive 4-bytes in hexadecimal with the expression EXPR as the starting memory address", cmd_x},
+  {"w", "Add a new watchpoint with the expression EXPR", cmd_w},
+  {"d", "Delete the watchpoint with the NO of N", cmd_d},
 };
 
 #define NR_CMD (sizeof(cmd_table) / sizeof(cmd_table[0]))
+static int cmd_si (char *args) {
+  char *arg = strtok(NULL, " ");
 
+  if (arg == NULL) cpu_exec(1);
+  else {
+    uint64_t num = strtoull(arg, NULL, 10);
+    cpu_exec(num);
+  }
+
+  return 0;
+}
+static int cmd_info (char *args) {
+  char *arg = strtok(NULL, " ");
+
+  if (strcmp(arg, "r") == 0) {
+    isa_reg_display();
+  } else if (strcmp(arg, "w") == 0) {
+    watchpoint_display();
+  } else
+    printf("Unknown command '%s'\n", arg);
+  
+  return 0;
+}
+static int cmd_p (char *args) {
+  if (args == NULL) {
+    printf("Input the 'EXPR'\n");
+    return 0;
+  }
+
+  bool success = false;
+  uint32_t val = expr(args, &success);
+  if (success == false) {
+    printf("The input 'EXPR' is wrong\n");
+    return 0;
+  }
+  printf("0x%08x\n", val);
+
+  return 0;
+}
+static int cmd_x (char *args) {
+  char *args_end = args + strlen(args);
+  char *arg = strtok(NULL, " ");
+
+  if (arg == NULL) {
+    printf("Input the number of 4-bytes in decimal as 'N'\n");
+    return 0;
+  }
+  int num_4bytes = strtol(arg, NULL, 10);
+
+  args += strlen(arg) + 1;
+  if (args >= args_end) {
+    printf("Input the starting memory address as 'EXPR'\n");
+    return 0;
+  }
+
+  bool success = true;
+  vaddr_t addr = expr(args, &success);
+  if (success == false) {
+    printf("The input 'EXPR' is wrong\n");
+    return 0;
+  }
+
+  for (int i = 0; i < num_4bytes; i ++)
+    printf("0x%08x  ", isa_vaddr_read(addr + i * 4, 4));
+  printf("\n");
+
+  return 0;
+}
+static int cmd_w (char *args) {
+  if (args == NULL) {
+    printf("Input the 'EXPR'\n");
+    return 0;
+  }
+
+  bool success = true;
+  uint32_t val = expr(args, &success);
+  if (success == false) {
+    printf("The input 'EXPR' is wrong\n");
+    return 0;
+  }
+  new_wp(args, val);
+
+  return 0;
+}
+
+static int cmd_d (char *args) {
+  char *arg = strtok(NULL, " ");
+
+  if (arg == NULL) {
+    printf("Input the 'N'\n");
+    return 0;
+  }
+
+  int NO = strtol(arg, NULL, 10);
+  free_wp(NO);
+
+  return 0;
+}
 static int cmd_help(char *args) {
   /* extract the first argument */
   char *arg = strtok(NULL, " ");
