@@ -21,6 +21,37 @@ static inline make_DopHelper(r) {
 
   print_Dop(op->str, OP_STR_SIZE, "%s", reg_name(op->reg, 4));
 }
+make_DHelper (R) {
+  decode_op_r(id_src, decinfo.isa.instr.rs1, true);
+  decode_op_r(id_src2, decinfo.isa.instr.rs2, true);
+  decode_op_r(id_dest, decinfo.isa.instr.rd, false);
+}
+
+make_DHelper (I) {
+  decode_op_r(id_src, decinfo.isa.instr.rs1, true);
+  decode_op_i(id_src2, decinfo.isa.instr.simm11_0, true);
+  decode_op_r(id_dest, decinfo.isa.instr.rd, false);
+}
+
+make_DHelper (I_shamt) {
+  decode_op_r(id_src, decinfo.isa.instr.rs1, true);
+  decode_op_i(id_src2, decinfo.isa.instr.rs2, true);
+  decode_op_r(id_dest, decinfo.isa.instr.rd, false);
+}
+
+make_DHelper (B) {
+  decode_op_r(id_src, decinfo.isa.instr.rs1, true);
+  decode_op_r(id_src2, decinfo.isa.instr.rs2, true);
+  int32_t simm = (decinfo.isa.instr.simm12 << 12) | (decinfo.isa.instr.imm11 << 11) | (decinfo.isa.instr.imm10_5 << 5) | (decinfo.isa.instr.imm4_1 << 1);
+  decode_op_i(id_dest, simm, true);
+}
+
+make_DHelper (J) {
+  int32_t simm = (decinfo.isa.instr.simm20 << 20) | (decinfo.isa.instr.imm19_12 << 12) | (decinfo.isa.instr.imm11_ << 11) | (decinfo.isa.instr.imm10_1 << 1);
+  decode_op_i(id_src, simm, true);
+  decode_op_r(id_dest, decinfo.isa.instr.rd, false);
+}
+
 
 make_DHelper(U) {
   decode_op_i(id_src, decinfo.isa.instr.imm31_12 << 12, true);
