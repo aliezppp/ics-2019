@@ -121,7 +121,7 @@ static bool make_token(char *e) {
 bool check_parentheses (int start, int end) {
   if (tokens[start].type != '(' || tokens[end].type != ')')
     return false;
-  
+  int a=0;
   int bracket_sta = 0;
   for (int i = start; i <= end; i ++) {
     if (tokens[i].type == '(') bracket_sta ++;
