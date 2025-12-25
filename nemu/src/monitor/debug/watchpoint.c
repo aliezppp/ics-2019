@@ -68,16 +68,11 @@ void watchpoint_display () {
 }
 
 bool check_watchpoint () {
-  bool is_changed = false;
-  printf("%s","watchpoint");
-  
-
+  bool changed = false;
   WP *point = head;
   while (point != NULL) {
     bool success = true;
     uint32_t new_val = expr(point->expr, &success);
-    printf("Old value: %u\n", point->last_val);
-      printf("New value: %u\n\n", new_val);
     if (new_val != point->last_val) {
       printf("\nWatchpoint %d:\n", point->NO);
       printf("EXPR: %s\n", point->expr);
@@ -85,11 +80,11 @@ bool check_watchpoint () {
       printf("New value: %u\n\n", new_val);
 
       point->last_val = new_val;
-      is_changed = true;
+      changed = true;
     }
 
     point = point->next;
   }
 
-  return is_changed;
+  return changed;
 }

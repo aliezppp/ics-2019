@@ -65,38 +65,45 @@ static struct {
 };
 
 #define NR_CMD (sizeof(cmd_table) / sizeof(cmd_table[0]))
-
-static int cmd_d (char *args) {
+static int cmd_si (char *args) {
   char *arg = strtok(NULL, " ");
 
-  if (arg == NULL) {
-    printf("Input the 'N'\n");
-    return 0;
+  if (arg == NULL) cpu_exec(1);
+  else {
+    uint64_t num = strtoull(arg, NULL, 10);
+    cpu_exec(num);
   }
-
-  int NO = strtol(arg, NULL, 10);
-  free_wp(NO);
 
   return 0;
 }
+static int cmd_info (char *args) {
+  char *arg = strtok(NULL, " ");
 
-static int cmd_w (char *args) {
+  if (strcmp(arg, "r") == 0) {
+    isa_reg_display();
+  } else if (strcmp(arg, "w") == 0) {
+    watchpoint_display();
+  } else
+    printf("Unknown command '%s'\n", arg);
+  
+  return 0;
+}
+static int cmd_p (char *args) {
   if (args == NULL) {
     printf("Input the 'EXPR'\n");
     return 0;
   }
 
-  bool success = true;
+  bool success = false;
   uint32_t val = expr(args, &success);
   if (success == false) {
     printf("The input 'EXPR' is wrong\n");
     return 0;
   }
-  new_wp(args, val);
+  printf("0x%08x\n", val);
 
   return 0;
 }
-
 static int cmd_x (char *args) {
   char *args_end = args + strlen(args);
   char *arg = strtok(NULL, " ");
@@ -126,49 +133,36 @@ static int cmd_x (char *args) {
 
   return 0;
 }
-
-static int cmd_p (char *args) {
+static int cmd_w (char *args) {
   if (args == NULL) {
     printf("Input the 'EXPR'\n");
     return 0;
   }
 
-  bool success = false;
+  bool success = true;
   uint32_t val = expr(args, &success);
   if (success == false) {
     printf("The input 'EXPR' is wrong\n");
     return 0;
   }
-  printf("0x%08x\n", val);
+  new_wp(args, val);
 
   return 0;
 }
 
-static int cmd_info (char *args) {
+static int cmd_d (char *args) {
   char *arg = strtok(NULL, " ");
 
-  if (strcmp(arg, "r") == 0) {
-    isa_reg_display();
-  } else if (strcmp(arg, "w") == 0) {
-    watchpoint_display();
-  } else
-    printf("Unknown command '%s'\n", arg);
-  
-  return 0;
-}
-
-static int cmd_si (char *args) {
-  char *arg = strtok(NULL, " ");
-
-  if (arg == NULL) cpu_exec(1);
-  else {
-    uint64_t num = strtoull(arg, NULL, 10);
-    cpu_exec(num);
+  if (arg == NULL) {
+    printf("Input the 'N'\n");
+    return 0;
   }
 
+  int NO = strtol(arg, NULL, 10);
+  free_wp(NO);
+
   return 0;
 }
-
 static int cmd_help(char *args) {
   /* extract the first argument */
   char *arg = strtok(NULL, " ");
